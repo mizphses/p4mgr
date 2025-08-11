@@ -19,14 +19,17 @@ P4Mgr は、Raspberry Pi で LED Matrix (P4 32x64 パネル 2 枚)を制御し�
 ## インストール
 
 ```bash
-# uvを使用したインストール
-uv pip install -e .
+# venv作成
+python -m venv .
+
+# 依存関係のインストール
+pip install -e .
 ```
 
 ## 使用方法
 
-1. 設定ファイル(config.json)を作成
-2. P4Mgr を起動
+1. 設定ファイル(config.json)を作成（編集）
+2. python main.py で p4Mgr を起動
 3. USB テンキーで表示したい番号を入力して Enter
 
 ### 設定ファイル例
