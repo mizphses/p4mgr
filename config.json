@@ -1,0 +1,34 @@
+{
+  "01": {
+    "type": "dest",
+    "typeBox": {
+      "texts": ["特急", "LTD.EXP"],
+      "color": "#FFFFFF",
+      "width": 40
+    },
+    "destination": {
+      "text": "大阪",
+      "color": "#FFFFFF"
+    },
+    "dstBgColor": "#FF0000",
+    "scroll": {
+      "text": "途中、名古屋、京都に止まります",
+      "color": "#FFFFFF"
+    }
+  },
+  "02": {
+    "type": "textNsc",
+    "txt": {
+      "text": "パトカーに続け",
+      "color": "#FF0000"
+    }
+  },
+  "03": {
+    "type": "textScr",
+    "txt": {
+      "text": "今日も一日ご安全に！安全運行にご協力お願いいたします。",
+      "color": "#FFFF00",
+      "size": 16
+    }
+  }
+}

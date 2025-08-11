@@ -1,0 +1,30 @@
+[project]
+name = "p4mgr"
+version = "0.1.0"
+description = "LED Matrix Display Manager for Raspberry Pi"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pillow",
+    "evdev",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["p4mgrcore"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "S", "B", "A", "C4", "PT", "Q"]
+ignore = ["E501"]
