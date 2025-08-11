@@ -1,15 +1,14 @@
 """Display template implementations for LED matrix."""
 
-import time
 import threading
+import time
 from abc import ABC, abstractmethod
 from typing import Any
 
 from PIL import Image, ImageDraw
 
-from .rgbmatrix import RGBMatrix
-
 from .font_manager import FontManager
+from .rgbmatrix import RGBMatrix
 
 
 class DisplayTemplate(ABC):
@@ -43,7 +42,7 @@ class DisplayTemplate(ABC):
         """Clear the display."""
         self.canvas.Clear()
         self.canvas = self.matrix.SwapOnVSync(self.canvas)
-    
+
     def stop(self) -> None:
         """Stop the display rendering."""
         self._stop_event.set()
@@ -65,7 +64,7 @@ class DestinationDisplay(DisplayTemplate):
         self._render_thread = threading.Thread(target=self._render_loop)
         self._render_thread.daemon = True
         self._render_thread.start()
-    
+
     def _render_loop(self) -> None:
         """Actual render loop running in separate thread."""
         # Extract configuration
@@ -80,7 +79,7 @@ class DestinationDisplay(DisplayTemplate):
         scroll_color = scroll_data.get("color", "#FFFFFF")
         scroll_size = scroll_data.get("size", 12)
         scroll_font = scroll_data.get("font", None)
-        
+
         # Extract type box configuration
         type_box_config = self.config.get("typeBox", {})
         type_texts = type_box_config.get("texts", ["特急", "LTD.EXP"])
@@ -92,20 +91,22 @@ class DestinationDisplay(DisplayTemplate):
         # Set up scrolling text
         if scroll_text:
             scroll_y = self.canvas_height - 13
-            scroll_width, _ = self.font_manager.get_text_size(scroll_text, font_name=scroll_font, size=scroll_size)
-            
+            scroll_width, _ = self.font_manager.get_text_size(
+                scroll_text, font_name=scroll_font, size=scroll_size
+            )
+
             # Check if text should be static (7 characters or less)
             if len(scroll_text) <= 7:
                 # Static display for short text
                 image = Image.new("RGB", (self.canvas_width, self.canvas_height))
                 draw = ImageDraw.Draw(image)
-                
+
                 # Draw type box (left side)
                 draw.rectangle(
                     [(0, 0), (type_box_width, self.canvas_height)],
                     fill=self._hex_to_rgb(dst_bg_color),
                 )
-                
+
                 # Draw type text
                 y_offset = 3
                 for text in type_texts:
@@ -115,28 +116,43 @@ class DestinationDisplay(DisplayTemplate):
                     elif len(text) > 4:
                         text_size = 7
                     self.font_manager.draw_text(
-                        image, text, (4, y_offset), font_name=type_text_font, size=text_size, color=type_text_color
+                        image,
+                        text,
+                        (4, y_offset),
+                        font_name=type_text_font,
+                        size=text_size,
+                        color=type_text_color,
                     )
                     y_offset += 15
-                
+
                 # Draw destination text
                 dest_x = type_box_width + 4
                 dest_y = 0
                 self.font_manager.draw_text(
-                    image, dest_text, (dest_x, dest_y), font_name=dest_font, size=dest_size, color=dest_color
+                    image,
+                    dest_text,
+                    (dest_x, dest_y),
+                    font_name=dest_font,
+                    size=dest_size,
+                    color=dest_color,
                 )
-                
+
                 # Draw static scroll text
                 static_x = type_box_width + 4
                 self.font_manager.draw_text(
-                    image, scroll_text, (static_x, scroll_y), font_name=scroll_font, size=scroll_size, color=scroll_color
+                    image,
+                    scroll_text,
+                    (static_x, scroll_y),
+                    font_name=scroll_font,
+                    size=scroll_size,
+                    color=scroll_color,
                 )
-                
+
                 # Update canvas once
                 self.canvas.SetImage(image.convert("RGB"))
                 self.canvas = self.matrix.SwapOnVSync(self.canvas)
                 return
-            
+
             # Scrolling animation for longer text
             scroll_x = self.canvas_width
             while not self._stop_event.is_set():
@@ -159,7 +175,12 @@ class DestinationDisplay(DisplayTemplate):
                     elif len(text) > 4:
                         text_size = 7
                     self.font_manager.draw_text(
-                        image, text, (4, y_offset), font_name=type_text_font, size=text_size, color=type_text_color
+                        image,
+                        text,
+                        (4, y_offset),
+                        font_name=type_text_font,
+                        size=text_size,
+                        color=type_text_color,
                     )
                     y_offset += 15
 
@@ -167,11 +188,19 @@ class DestinationDisplay(DisplayTemplate):
                 dest_x = type_box_width + 4
                 dest_y = 0
                 self.font_manager.draw_text(
-                    image, dest_text, (dest_x, dest_y), font_name=dest_font, size=dest_size, color=dest_color
+                    image,
+                    dest_text,
+                    (dest_x, dest_y),
+                    font_name=dest_font,
+                    size=dest_size,
+                    color=dest_color,
                 )
 
                 # Draw scrolling text with clipping to avoid type box area
-                if scroll_x + scroll_width > type_box_width or scroll_x > type_box_width:
+                if (
+                    scroll_x + scroll_width > type_box_width
+                    or scroll_x > type_box_width
+                ):
                     # Create a temporary image for scrolling text
                     temp_img = Image.new("RGB", (self.canvas_width, self.canvas_height))
                     self.font_manager.draw_text(
@@ -215,14 +244,24 @@ class DestinationDisplay(DisplayTemplate):
             text_size = 10 if len(type_texts) > 1 else 12
             for text in type_texts:
                 self.font_manager.draw_text(
-                    image, text, (4, y_offset), font_name=type_text_font, size=text_size, color=type_text_color
+                    image,
+                    text,
+                    (4, y_offset),
+                    font_name=type_text_font,
+                    size=text_size,
+                    color=type_text_color,
                 )
                 y_offset += 13
 
             # Draw destination text (large)
             dest_x = type_box_width + 4
             self.font_manager.draw_text(
-                image, dest_text, (dest_x, 4), font_name=dest_font, size=24, color=dest_color
+                image,
+                dest_text,
+                (dest_x, 4),
+                font_name=dest_font,
+                size=24,
+                color=dest_color,
             )
 
             self.canvas.SetImage(image.convert("RGB"))
@@ -245,12 +284,16 @@ class TextDisplay(DisplayTemplate):
         font = txt_config.get("font", None)
 
         # Calculate text position for centering
-        text_width, text_height = self.font_manager.get_text_size(text, font_name=font, size=size)
+        text_width, text_height = self.font_manager.get_text_size(
+            text, font_name=font, size=size
+        )
         x = (self.canvas_width - text_width) // 2
         y = (self.canvas_height - text_height) // 2 - 8
 
         # Draw text
-        self.font_manager.draw_text(image, text, (x, y), font_name=font, size=size, color=color)
+        self.font_manager.draw_text(
+            image, text, (x, y), font_name=font, size=size, color=color
+        )
 
         # Update matrix
         self.canvas.SetImage(image.convert("RGB"))
@@ -266,7 +309,7 @@ class ScrollingTextDisplay(DisplayTemplate):
         self._render_thread = threading.Thread(target=self._render_loop)
         self._render_thread.daemon = True
         self._render_thread.start()
-    
+
     def _render_loop(self) -> None:
         """Actual render loop running in separate thread."""
         # Create PIL image
@@ -281,7 +324,9 @@ class ScrollingTextDisplay(DisplayTemplate):
         font = txt_config.get("font", None)
 
         # Get text dimensions
-        text_width, text_height = self.font_manager.get_text_size(text, font_name=font, size=size)
+        text_width, text_height = self.font_manager.get_text_size(
+            text, font_name=font, size=size
+        )
         y = (self.canvas_height - text_height) // 2
 
         # Add padding between repeats
@@ -313,7 +358,7 @@ class ScrollingTextDisplay(DisplayTemplate):
             if x < -full_width:
                 x = 0
 
-            time.sleep(1/30)  # ~30fps
+            time.sleep(1 / 30)  # ~30fps
 
 
 def create_display_template(

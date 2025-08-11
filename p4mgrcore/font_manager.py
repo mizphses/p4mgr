@@ -43,9 +43,10 @@ class FontManager:
             system_font_paths = [
                 Path("/usr/share/fonts/opentype/noto") / font_name,
                 Path("/usr/share/fonts/truetype/noto") / font_name,
-                Path("/usr/share/fonts/truetype/liberation") / "LiberationSans-Regular.ttf",
+                Path("/usr/share/fonts/truetype/liberation")
+                / "LiberationSans-Regular.ttf",
             ]
-            
+
             for sys_path in system_font_paths:
                 if sys_path.exists():
                     font_path = sys_path
@@ -59,7 +60,7 @@ class FontManager:
                 font = ImageFont.load_default()
                 self.font_cache[cache_key] = font
                 return font
-        
+
         # Load the font
         if font_path.exists():
             try:

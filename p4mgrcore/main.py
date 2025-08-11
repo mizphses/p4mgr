@@ -5,18 +5,22 @@ import sys
 import time
 from pathlib import Path
 
-from .rgbmatrix import RGBMatrix, RGBMatrixOptions
-
 from .config import Config
 from .display_templates import create_display_template
 from .font_manager import FontManager
 from .input_handler import InputHandler
+from .rgbmatrix import RGBMatrix, RGBMatrixOptions
 
 
 class P4MgrApp:
     """Main application class for P4Mgr."""
 
-    def __init__(self, config_file: str = "config.json", font_dir: str = "fonts", use_local: bool = False):
+    def __init__(
+        self,
+        config_file: str = "config.json",
+        font_dir: str = "fonts",
+        use_local: bool = False,
+    ):
         """Initialize P4Mgr application.
 
         Args:
@@ -51,8 +55,10 @@ class P4MgrApp:
         options.brightness = 80
         options.show_refresh_rate = False
         options.disable_hardware_pulsing = True  # Avoid sound module conflict
-        options.led_rgb_sequence = "RGB"  # Try different values: "RGB", "RBG", "GRB", "GBR", "BGR", "BRG"
-        
+        options.led_rgb_sequence = (
+            "RGB"  # Try different values: "RGB", "RBG", "GRB", "GBR", "BGR", "BRG"
+        )
+
         # P4 panel specific settings
         options.multiplexing = 0  # Try 0-8 if display is garbled
         options.row_address_type = 0  # Try 0-4 for different addressing
@@ -110,14 +116,14 @@ class P4MgrApp:
                 display.stop()
         else:
             print(f"Unknown display type: {display_config.get('type')}")
-    
+
     def clear_display(self) -> None:
         """Clear the current display."""
         # Stop current display if running
         if self.current_display_instance:
             self.current_display_instance.stop()
             self.current_display_instance = None
-        
+
         # Clear display
         self.matrix.Clear()
         self.current_display = None

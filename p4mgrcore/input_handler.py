@@ -45,18 +45,19 @@ class InputHandler:
                 return device
             except Exception as e:
                 print(f"Failed to open specified device {self.device_path}: {e}")
-        
+
         try:
             # Try both standard list_devices and manual search
             device_paths = list_devices()
             if not device_paths:
                 # Manually check common device paths
                 import glob
-                device_paths = glob.glob('/dev/input/event*')
+
+                device_paths = glob.glob("/dev/input/event*")
                 print(f"Manually found {len(device_paths)} devices in /dev/input/")
             else:
                 print(f"Found {len(device_paths)} input devices")
-            
+
             devices = []
             for path in device_paths:
                 try:
@@ -65,12 +66,19 @@ class InputHandler:
                     print(f"Device: {device.name} at {path}")
                 except Exception as e:
                     print(f"Failed to access device at {path}: {e}")
-            
+
             for device in devices:
                 # Look for devices with numpad-like names or keyboards with numpad keys
                 if any(
                     keyword in device.name.lower()
-                    for keyword in ["numpad", "keypad", "numeric", "number", "keyboard", "touchpad"]
+                    for keyword in [
+                        "numpad",
+                        "keypad",
+                        "numeric",
+                        "number",
+                        "keyboard",
+                        "touchpad",
+                    ]
                 ):
                     # Check if device has numpad keys
                     caps = device.capabilities()
@@ -79,16 +87,16 @@ class InputHandler:
                         return device
                     else:
                         print(f"Device {device.name} has no numpad keys")
-            
+
             # If no device with numpad keys found, show available devices
             print("No devices with numpad keys found.")
             print("Available input devices:")
             for device in devices:
                 print(f"  - {device.name} ({device.path})")
-            
+
         except Exception as e:
             print(f"Error finding devices: {e}")
-        
+
         return None
 
     def start(self) -> bool:
@@ -126,14 +134,14 @@ class InputHandler:
         try:
             # Grab exclusive access to the device
             self.device.grab()
-            
+
             while self.running:
                 # Use select to check if data is available with timeout
                 r, w, x = select.select([self.device.fd], [], [], 0.1)
-                
+
                 if not r:
                     continue
-                    
+
                 for event in self.device.read():
                     if event.type == ecodes.EV_KEY:
                         key_event = categorize(event)
@@ -154,7 +162,7 @@ class InputHandler:
             keycode: Key code string from evdev.
         """
         current_time = time.time()
-        
+
         # Check for key repeat
         if self._last_key == keycode:
             if current_time - self._last_key_time < 0.3:  # 300ms threshold
@@ -163,10 +171,10 @@ class InputHandler:
                 self._key_repeat_count = 1
         else:
             self._key_repeat_count = 1
-        
+
         self._last_key = keycode
         self._last_key_time = current_time
-        
+
         # Map numpad keys
         numpad_map = {
             "KEY_KP0": "0",
@@ -192,7 +200,9 @@ class InputHandler:
             key = numpad_map[keycode]
 
             # Handle BS or Enter repeat for clear
-            if (key == "BS" or key == "ENTER") and self._key_repeat_count >= self._repeat_threshold:
+            if (
+                key == "BS" or key == "ENTER"
+            ) and self._key_repeat_count >= self._repeat_threshold:
                 if self._clear_callback:
                     print("Clearing display...")
                     self._clear_callback()
@@ -217,18 +227,18 @@ class InputHandler:
     def clear_input(self) -> None:
         """Clear current input buffer."""
         self.current_input = ""
-    
+
     def set_direct_number_callback(self, callback: Callable[[str], None]) -> None:
         """Set callback for direct number key switching.
-        
+
         Args:
             callback: Function to call with number code (e.g., "01", "02").
         """
         self._direct_number_callback = callback
-    
+
     def set_clear_callback(self, callback: Callable[[], None]) -> None:
         """Set callback for clearing display.
-        
+
         Args:
             callback: Function to call when clear is triggered.
         """

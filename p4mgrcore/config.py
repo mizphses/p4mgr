@@ -1,8 +1,8 @@
 """Configuration management for P4Mgr."""
 
 import json
-import urllib.request
 import urllib.error
+import urllib.request
 from pathlib import Path
 from typing import Any
 
@@ -10,7 +10,9 @@ from typing import Any
 class Config:
     """Configuration manager for display settings."""
 
-    def __init__(self, config_path: str | Path = "config.json", use_local: bool = False):
+    def __init__(
+        self, config_path: str | Path = "config.json", use_local: bool = False
+    ):
         """Initialize configuration manager.
 
         Args:
@@ -48,14 +50,14 @@ class Config:
 
     def _load_remote_config(self) -> bool:
         """Load configuration from remote API.
-        
+
         Returns:
             True if successful, False otherwise.
         """
         try:
             print(f"Loading config from {self.api_url}")
             with urllib.request.urlopen(self.api_url, timeout=5) as response:
-                self.config_data = json.loads(response.read().decode('utf-8'))
+                self.config_data = json.loads(response.read().decode("utf-8"))
                 print("Successfully loaded remote config")
                 return True
         except urllib.error.URLError as e:
