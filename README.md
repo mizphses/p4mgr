@@ -29,8 +29,9 @@ pip install -e .
 ## 使用方法
 
 1. 設定ファイル(config.json)を作成（編集）
-2. python main.py で p4Mgr を起動
-3. USB テンキーで表示したい番号を入力して Enter
+2. フォントを落としてくる（面倒なら`./setup_fonts.sh`を実行）
+3. python main.py で p4Mgr を起動
+4. USB テンキーで表示したい番号を入力して Enter
 
 ### 設定ファイル例
 
