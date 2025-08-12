@@ -58,15 +58,15 @@ class DisplayTemplate(ABC):
 
 class DestinationDisplay(DisplayTemplate):
     """Train destination display template."""
-    
+
     def _get_type_text_size(self, text_length: int) -> int:
         """Calculate appropriate font size based on text length."""
         if text_length > 4:
-            return 7
+            return 9
         elif text_length > 3:
-            return 10
-        return 14
-    
+            return 12
+        return 16
+
     def _create_static_base_image(
         self, type_texts: list, type_text_font: str, type_text_color: str,
         type_box_width: int, dst_bg_color_rgb: tuple[int, int, int],
@@ -75,13 +75,13 @@ class DestinationDisplay(DisplayTemplate):
         """Pre-render static elements for performance."""
         image = self._create_image()
         draw = ImageDraw.Draw(image)
-        
+
         # Draw type box
         draw.rectangle(
             [(0, 0), (type_box_width, self.canvas_height)],
             fill=dst_bg_color_rgb,
         )
-        
+
         # Draw type text
         y_offset = DisplayConstants.TYPE_BOX_TEXT_Y_OFFSET
         for text in type_texts:
@@ -94,8 +94,8 @@ class DestinationDisplay(DisplayTemplate):
                 size=text_size,
                 color=type_text_color,
             )
-            y_offset += DisplayConstants.TYPE_BOX_TEXT_SPACING
-        
+            y_offset += DisplayConstants.TYPE_BOX_TEXT_SPACING+2
+
         # Draw destination text
         dest_x = type_box_width + 4
         dest_y = 0
@@ -107,7 +107,7 @@ class DestinationDisplay(DisplayTemplate):
             size=dest_size,
             color=dest_color,
         )
-        
+
         return image
 
     def render(self) -> None:
@@ -138,14 +138,14 @@ class DestinationDisplay(DisplayTemplate):
         type_text_color = type_box_config.get("color", "#FFFFFF")
         type_text_font = type_box_config.get("font", None)
         type_box_width = type_box_config.get("width", DisplayConstants.TYPE_BOX_DEFAULT_WIDTH)
-        
+
         # Pre-convert colors to RGB for performance
         dst_bg_color_rgb = hex_to_rgb(dst_bg_color)
 
         # Create reusable image buffer
         image = self._create_image()
         draw = ImageDraw.Draw(image)
-        
+
         # Set up scrolling text
         if scroll_text:
             scroll_y = self.canvas_height - DisplayConstants.SCROLL_Y_OFFSET
@@ -201,7 +201,7 @@ class DestinationDisplay(DisplayTemplate):
                 )
 
                 # Update canvas once
-                self.canvas.SetImage(image.convert("RGB", dither=Image.Dither.NONE))
+                self.canvas.SetImage(image.convert("RGB"))
                 self.canvas = self.matrix.SwapOnVSync(self.canvas)
                 return
 
@@ -210,14 +210,14 @@ class DestinationDisplay(DisplayTemplate):
                 scroll_width, self.canvas_width, DisplayConstants.SCROLL_SPEED
             )
             position_index = 0
-            
+
             # Pre-render static elements
             static_base = self._create_static_base_image(
                 type_texts, type_text_font, type_text_color,
                 type_box_width, dst_bg_color_rgb,
                 dest_text, dest_font, dest_size, dest_color
             )
-            
+
             while not self._stop_event.is_set():
                 # Copy pre-rendered static elements
                 image = static_base.copy()
@@ -249,7 +249,7 @@ class DestinationDisplay(DisplayTemplate):
                                 image.putpixel((x, y), pixel)
 
                 # Update canvas
-                self.canvas.SetImage(image.convert("RGB", dither=Image.Dither.NONE))
+                self.canvas.SetImage(image.convert("RGB"))
                 self.canvas = self.matrix.SwapOnVSync(self.canvas)
 
                 # Update position index
@@ -292,7 +292,7 @@ class DestinationDisplay(DisplayTemplate):
                 color=dest_color,
             )
 
-            self.canvas.SetImage(image.convert("RGB", dither=Image.Dither.NONE))
+            self.canvas.SetImage(image.convert("RGB"))
             self.canvas = self.matrix.SwapOnVSync(self.canvas)
 
 
@@ -324,7 +324,7 @@ class TextDisplay(DisplayTemplate):
         )
 
         # Update matrix
-        self.canvas.SetImage(image.convert("RGB", dither=Image.Dither.NONE))
+        self.canvas.SetImage(image.convert("RGB"))
         self.canvas = self.matrix.SwapOnVSync(self.canvas)
 
 
@@ -378,7 +378,7 @@ class ScrollingTextDisplay(DisplayTemplate):
                 current_x += full_width
 
             # Update matrix
-            self.canvas.SetImage(image.convert("RGB", dither=Image.Dither.NONE))
+            self.canvas.SetImage(image.convert("RGB"))
             self.canvas = self.matrix.SwapOnVSync(self.canvas)
 
             # Update position
