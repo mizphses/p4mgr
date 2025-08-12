@@ -10,7 +10,7 @@ from PIL import Image, ImageDraw
 from .constants import DisplayConstants
 from .font_manager import FontManager
 from .rgbmatrix import RGBMatrix
-from .utils import calculate_scroll_positions, hex_to_rgb
+from .utils import calculate_scroll_positions, get_local_ip, hex_to_rgb
 
 
 class DisplayTemplate(ABC):
@@ -404,6 +404,44 @@ class ScrollingTextDisplay(DisplayTemplate):
             time.sleep(DisplayConstants.FRAME_DURATION)
 
 
+class IPAddressDisplay(DisplayTemplate):
+    """Display local IP address."""
+
+    def render(self) -> None:
+        """Render local IP address."""
+        # Create PIL image
+        image = Image.new("RGB", (self.canvas_width, self.canvas_height))
+
+        # Get local IP address
+        ip_address = get_local_ip()
+
+        # Default configuration if not provided
+        config = self.config.get("ip", {})
+        color = config.get("color", "#00FF00")  # Green by default
+        size = config.get("size", 14)
+        font = config.get("font", None)
+        label = config.get("label", "IP:")
+
+        # Format display text
+        display_text = f"{label} {ip_address}"
+
+        # Calculate text position for centering
+        text_width, text_height = self.font_manager.get_text_size(
+            display_text, font_name=font, size=size
+        )
+        x = (self.canvas_width - text_width) // 2
+        y = (self.canvas_height - text_height) // 2 - 4
+
+        # Draw text
+        self.font_manager.draw_text(
+            image, display_text, (x, y), font_name=font, size=size, color=color
+        )
+
+        # Update matrix
+        self.canvas.SetImage(image.convert("RGB"))
+        self.canvas = self.matrix.SwapOnVSync(self.canvas)
+
+
 def create_display_template(
     matrix: RGBMatrix, font_manager: FontManager, config: dict[str, Any]
 ) -> DisplayTemplate | None:
@@ -425,5 +463,7 @@ def create_display_template(
         return TextDisplay(matrix, font_manager, config)
     elif display_type == "textScr":
         return ScrollingTextDisplay(matrix, font_manager, config)
+    elif display_type == "ip":
+        return IPAddressDisplay(matrix, font_manager, config)
 
     return None

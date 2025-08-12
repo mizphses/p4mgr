@@ -3,6 +3,8 @@
 メモリ効率とパフォーマンスを重視した実装
 """
 
+import socket
+
 from p4mgrcore.constants import COLOR_CACHE
 
 
@@ -75,3 +77,24 @@ def calculate_scroll_positions(
         _scroll_positions_cache[cache_key] = positions
 
     return positions
+
+
+def get_local_ip() -> str:
+    """Get the local IP address of the machine.
+    
+    Returns:
+        Local IP address as string, or "No Network" if unable to determine.
+    """
+    try:
+        # Create a dummy socket to determine local IP
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+            # Connect to a public DNS server (doesn't actually send data)
+            s.connect(("8.8.8.8", 80))
+            return s.getsockname()[0]
+    except Exception:
+        # If network is unavailable, try to get hostname
+        try:
+            hostname = socket.gethostname()
+            return socket.gethostbyname(hostname)
+        except Exception:
+            return "No Network"

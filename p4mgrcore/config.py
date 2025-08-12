@@ -21,9 +21,40 @@ class Config:
         """
         self.config_path = Path(config_path)
         self.config_data: dict[str, Any] = {}
-        self.api_url = "https://signage-be.miz.cab/output.json"
+        self.api_url = None  # Will be loaded from config
+        self.api_key = None  # Will be loaded from config
         self.use_local = use_local
+        self._load_initial_config()
         self.load_config()
+
+    def _load_initial_config(self) -> None:
+        """Load initial configuration to get API URL and key."""
+        if self.config_path.exists():
+            try:
+                with open(self.config_path, encoding="utf-8") as f:
+                    initial_config = json.load(f)
+                    # Get API URL from config
+                    if "api_url" in initial_config:
+                        self.api_url = initial_config["api_url"]
+                        print(f"API URL configured: {self.api_url}")
+                    else:
+                        # Default fallback
+                        self.api_url = "https://signage-be.miz.cab/output.json"
+                        print("Using default API URL")
+                    
+                    # Get API key from config
+                    if "api_key" in initial_config:
+                        self.api_key = initial_config["api_key"]
+                        print("API key configured")
+                    else:
+                        print("No API key configured - authentication disabled")
+            except Exception as e:
+                print(f"Error loading initial config: {e}")
+                self.api_url = "https://signage-be.miz.cab/output.json"
+        else:
+            # Default if no config file
+            self.api_url = "https://signage-be.miz.cab/output.json"
+            print("No config file found, using default API URL")
 
     def load_config(self) -> None:
         """Load configuration from JSON file or API."""
@@ -54,12 +85,35 @@ class Config:
         Returns:
             True if successful, False otherwise.
         """
+        if not self.api_url:
+            print("No API URL configured, skipping remote config")
+            return False
+            
         try:
             print(f"Loading config from {self.api_url}")
-            with urllib.request.urlopen(self.api_url, timeout=5) as response:
-                self.config_data = json.loads(response.read().decode("utf-8"))
-                print("Successfully loaded remote config")
+            headers = {'User-Agent': 'P4Mgr/1.0'}
+            
+            # Add API key to headers if configured
+            if self.api_key:
+                headers['Authorization'] = f'Bearer {self.api_key}'
+                # If API key is configured, use secure endpoint
+                if self.api_url.endswith('/output.json'):
+                    secure_url = self.api_url.replace('/output.json', '/output.json/secure')
+                    print(f"Using secure endpoint: {secure_url}")
+                    self.api_url = secure_url
+            
+            request = urllib.request.Request(self.api_url, headers=headers)
+            with urllib.request.urlopen(request, timeout=5) as response:
+                raw_data = response.read().decode("utf-8")
+                self.config_data = json.loads(raw_data)
+                print(f"Successfully loaded remote config (size: {len(raw_data)} bytes)")
+                print(f"Available display codes: {list(self.config_data.keys())}")
                 return True
+        except urllib.error.HTTPError as e:
+            print(f"HTTP error {e.code}: {e.reason}")
+            if e.code == 401:
+                print("Authentication failed - check your API key")
+            return False
         except urllib.error.URLError as e:
             print(f"Network error: {e}")
             return False
@@ -79,7 +133,12 @@ class Config:
         Returns:
             Display configuration dict or None if not found.
         """
-        return self.config_data.get(key)
+        # Check if config_data has a "displays" section (local format)
+        if "displays" in self.config_data:
+            return self.config_data["displays"].get(key)
+        else:
+            # Direct key access (API format)
+            return self.config_data.get(key)
 
     def reload(self) -> None:
         """Reload configuration from file or API."""

@@ -1,0 +1,50 @@
+{
+  "api_url": "https://signage-be.miz.cab/output.json",
+  "api_key": "sk_YOUR_API_KEY_HERE",
+  "00": {
+    "type": "ip",
+    "ip": {
+      "color": "#00FF00",
+      "size": 14,
+      "label": "IP:"
+    }
+  },
+  "01": {
+    "type": "dest",
+    "destination": { "text": "ど田舎", "color": "#ffffff", "size": 20 },
+    "dstBgColor": "#2264b9",
+    "typeBox": {
+      "texts": ["快特", "LTD.EXP"],
+      "color": "#eeff00",
+      "width": 40
+    },
+    "scroll": {
+      "text": "よくわからないところに連れてかれます",
+      "color": "#ffffff",
+      "size": 12
+    }
+  },
+  "02": {
+    "type": "dest",
+    "destination": { "text": "HANEDA", "color": "#ffffff", "size": 20 },
+    "dstBgColor": "#ff7b00",
+    "typeBox": { "texts": ["AP", "LIMO"], "color": "#ffffff", "width": 35 },
+    "scroll": { "text": "TOKYO HND INTL", "color": "#ffffff", "size": 12 }
+  },
+  "04": {
+    "type": "textNsc",
+    "txt": { "text": "パトカーに続け", "color": "#ffffff", "size": 18 }
+  },
+  "matrix": {
+    "rows": 32,
+    "cols": 64,
+    "chain_length": 2,
+    "brightness": 80,
+    "hardware_mapping": "adafruit-hat",
+    "gpio_slowdown": 4,
+    "led_rgb_sequence": "RGB",
+    "multiplexing": 0,
+    "row_address_type": 0,
+    "panel_type": ""
+  }
+}
