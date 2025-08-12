@@ -11,7 +11,7 @@ class DisplayConstants:
     SCROLL_SPEED = 2
     STATIC_TEXT_MAX_LENGTH = 7
     
-    RENDER_FPS = 30
+    RENDER_FPS = 20
     FRAME_DURATION = 1.0 / RENDER_FPS
     
     DEFAULT_FONT_SIZE = 16
@@ -28,7 +28,7 @@ class MatrixConfig:
     DEFAULT_BRIGHTNESS = 80
     DEFAULT_HARDWARE_MAPPING = "adafruit-hat"
     
-    GPIO_SLOWDOWN = 2
+    GPIO_SLOWDOWN = 4
 
 
 class InputConfig:
