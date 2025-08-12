@@ -126,7 +126,7 @@ class InputHandler:
         if self.device:
             try:
                 self.device.close()
-            except:
+            except Exception:
                 pass
 
     def _input_loop(self) -> None:
@@ -152,7 +152,7 @@ class InputHandler:
         finally:
             try:
                 self.device.ungrab()
-            except:
+            except Exception:
                 pass
 
     def _handle_key_press(self, keycode: str) -> None:

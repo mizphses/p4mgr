@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 import os
-
-from Cython.Build import cythonize
 from distutils.core import setup
 from distutils.extension import Extension
+
+from Cython.Build import cythonize
 
 # Path to the rpi-rgb-led-matrix library
 rgb_lib_path = os.path.abspath("../../rpi-rgb-led-matrix")

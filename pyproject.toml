@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "pillow",
-    "evdev",
+    "evdev; sys_platform == 'linux'",
 ]
 
 [project.optional-dependencies]

@@ -1,4 +1,12 @@
 {
+  "matrix": {
+    "rows": 32,
+    "cols": 64,
+    "chain_length": 2,
+    "brightness": 80,
+    "hardware_mapping": "adafruit-hat",
+    "gpio_slowdown": 2
+  },
   "01": {
     "type": "dest",
     "typeBox": {
