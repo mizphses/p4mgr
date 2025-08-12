@@ -148,7 +148,7 @@ class P4MgrApp:
         print("==================================")
         
         # Validate initial configuration
-        errors = quick_validate_config(self.config.config)
+        errors = quick_validate_config(self.config.config_data)
         if errors:
             print("\n設定ファイルにエラーがあります:")
             for error in errors:
