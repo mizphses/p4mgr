@@ -49,7 +49,7 @@ class P4MgrApp:
         options = RGBMatrixOptions()
         
         # Check for custom matrix configuration
-        matrix_config = self.config.config.get("matrix", {})
+        matrix_config = self.config.config_data.get("matrix", {})
         
         # Apply configuration with defaults
         options.rows = matrix_config.get("rows", MatrixConfig.DEFAULT_ROWS)
