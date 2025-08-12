@@ -4,10 +4,10 @@ After=network.target
 
 [Service]
 Type=simple
-User=pi
-Group=pi
-WorkingDirectory=/home/pi/p4mgr
-ExecStart=/usr/bin/python3 /home/pi/p4mgr/main.py
+User=mizphses
+Group=mizphses
+WorkingDirectory=/home/mizphses/p42
+ExecStart=/usr/bin/python3 /home/mizphses/p42/main.py
 Restart=always
 RestartSec=10
 StandardOutput=journal
