@@ -47,18 +47,26 @@ class P4MgrApp:
             Configured RGBMatrix instance.
         """
         options = RGBMatrixOptions()
-        
+
         # Check for custom matrix configuration
         matrix_config = self.config.config_data.get("matrix", {})
-        
+
         # Apply configuration with defaults
         options.rows = matrix_config.get("rows", MatrixConfig.DEFAULT_ROWS)
         options.cols = matrix_config.get("cols", MatrixConfig.DEFAULT_COLS)
-        options.chain_length = matrix_config.get("chain_length", MatrixConfig.DEFAULT_CHAIN_LENGTH)
+        options.chain_length = matrix_config.get(
+            "chain_length", MatrixConfig.DEFAULT_CHAIN_LENGTH
+        )
         options.parallel = matrix_config.get("parallel", 1)
-        options.hardware_mapping = matrix_config.get("hardware_mapping", MatrixConfig.DEFAULT_HARDWARE_MAPPING)
-        options.gpio_slowdown = matrix_config.get("gpio_slowdown", MatrixConfig.GPIO_SLOWDOWN)
-        options.brightness = matrix_config.get("brightness", MatrixConfig.DEFAULT_BRIGHTNESS)
+        options.hardware_mapping = matrix_config.get(
+            "hardware_mapping", MatrixConfig.DEFAULT_HARDWARE_MAPPING
+        )
+        options.gpio_slowdown = matrix_config.get(
+            "gpio_slowdown", MatrixConfig.GPIO_SLOWDOWN
+        )
+        options.brightness = matrix_config.get(
+            "brightness", MatrixConfig.DEFAULT_BRIGHTNESS
+        )
         options.show_refresh_rate = False
         options.disable_hardware_pulsing = True  # Avoid sound module conflict
         options.led_rgb_sequence = matrix_config.get("led_rgb_sequence", "RGB")
@@ -100,7 +108,7 @@ class P4MgrApp:
         if not display_config:
             print(f"No configuration found for code: {input_code}")
             return
-        
+
         # Validate configuration
         errors = quick_validate_config({"displays": {input_code: display_config}})
         if errors:
@@ -146,7 +154,7 @@ class P4MgrApp:
         """Run the main application loop."""
         print("P4Mgr - LED Matrix Display Manager")
         print("==================================")
-        
+
         # Validate initial configuration
         errors = quick_validate_config(self.config.config_data)
         if errors:

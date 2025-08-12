@@ -68,9 +68,16 @@ class DestinationDisplay(DisplayTemplate):
         return 16
 
     def _create_static_base_image(
-        self, type_texts: list, type_text_font: str, type_text_color: str,
-        type_box_width: int, dst_bg_color_rgb: tuple[int, int, int],
-        dest_text: str, dest_font: str, dest_size: int, dest_color: str
+        self,
+        type_texts: list,
+        type_text_font: str,
+        type_text_color: str,
+        type_box_width: int,
+        dst_bg_color_rgb: tuple[int, int, int],
+        dest_text: str,
+        dest_font: str,
+        dest_size: int,
+        dest_color: str,
     ) -> Image.Image:
         """Pre-render static elements for performance."""
         image = self._create_image()
@@ -94,7 +101,7 @@ class DestinationDisplay(DisplayTemplate):
                 size=text_size,
                 color=type_text_color,
             )
-            y_offset += DisplayConstants.TYPE_BOX_TEXT_SPACING+2
+            y_offset += DisplayConstants.TYPE_BOX_TEXT_SPACING + 2
 
         # Draw destination text
         dest_x = type_box_width + 4
@@ -137,7 +144,9 @@ class DestinationDisplay(DisplayTemplate):
         type_texts = type_box_config.get("texts", ["特急", "LTD.EXP"])
         type_text_color = type_box_config.get("color", "#FFFFFF")
         type_text_font = type_box_config.get("font", None)
-        type_box_width = type_box_config.get("width", DisplayConstants.TYPE_BOX_DEFAULT_WIDTH)
+        type_box_width = type_box_config.get(
+            "width", DisplayConstants.TYPE_BOX_DEFAULT_WIDTH
+        )
 
         # Pre-convert colors to RGB for performance
         dst_bg_color_rgb = hex_to_rgb(dst_bg_color)
@@ -213,9 +222,15 @@ class DestinationDisplay(DisplayTemplate):
 
             # Pre-render static elements
             static_base = self._create_static_base_image(
-                type_texts, type_text_font, type_text_color,
-                type_box_width, dst_bg_color_rgb,
-                dest_text, dest_font, dest_size, dest_color
+                type_texts,
+                type_text_font,
+                type_text_color,
+                type_box_width,
+                dst_bg_color_rgb,
+                dest_text,
+                dest_font,
+                dest_size,
+                dest_color,
             )
 
             while not self._stop_event.is_set():

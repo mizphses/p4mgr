@@ -24,7 +24,9 @@ class FontManager:
         self._temp_image_cache: dict[int, Image.Image] = {}
 
     def get_font(
-        self, font_name: str | None = None, size: int = DisplayConstants.DEFAULT_FONT_SIZE
+        self,
+        font_name: str | None = None,
+        size: int = DisplayConstants.DEFAULT_FONT_SIZE,
     ) -> ImageFont.FreeTypeFont:
         """Get font object with caching.
 
@@ -65,7 +67,7 @@ class FontManager:
                         print(f"  - {sys_path}")
                     print("Using default font (limited character support)")
                     self._default_font_loaded = True
-                
+
                 font = ImageFont.load_default()
                 self.font_cache[cache_key] = font
                 return font
@@ -112,7 +114,10 @@ class FontManager:
         draw.text(position, text, font=font, fill=color)
 
     def get_text_size(
-        self, text: str, font_name: str | None = None, size: int = DisplayConstants.DEFAULT_FONT_SIZE
+        self,
+        text: str,
+        font_name: str | None = None,
+        size: int = DisplayConstants.DEFAULT_FONT_SIZE,
     ) -> tuple[int, int]:
         """Get the size of text when rendered.
 
@@ -129,10 +134,10 @@ class FontManager:
         cache_key = size
         if cache_key not in self._temp_image_cache:
             self._temp_image_cache[cache_key] = Image.new("RGB", (1, 1))
-        
+
         temp_img = self._temp_image_cache[cache_key]
         draw = ImageDraw.Draw(temp_img)
-        
+
         try:
             bbox = draw.textbbox((0, 0), text, font=font)
             return bbox[2] - bbox[0], bbox[3] - bbox[1]
