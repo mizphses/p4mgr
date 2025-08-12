@@ -4,6 +4,9 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
+from .constants import DisplayConstants
+from .utils import hex_to_rgb
+
 
 class FontManager:
     """Manages font loading and caching for display."""
@@ -17,9 +20,11 @@ class FontManager:
         self.font_dir = Path(font_dir)
         self.font_cache: dict[tuple[str, int], ImageFont.FreeTypeFont] = {}
         self.default_font = "ipag.ttf"
+        self._default_font_loaded = False
+        self._temp_image_cache: dict[int, Image.Image] = {}
 
     def get_font(
-        self, font_name: str | None = None, size: int = 16
+        self, font_name: str | None = None, size: int = DisplayConstants.DEFAULT_FONT_SIZE
     ) -> ImageFont.FreeTypeFont:
         """Get font object with caching.
 
@@ -52,25 +57,29 @@ class FontManager:
                     font_path = sys_path
                     break
             else:
-                print(f"Font {font_name} not found in any location")
-                print(f"Searched paths: {self.font_dir / font_name}")
-                for sys_path in system_font_paths:
-                    print(f"  - {sys_path}")
-                print("Using default font (limited character support)")
+                # Load default font only once
+                if not self._default_font_loaded:
+                    print(f"Font {font_name} not found in any location")
+                    print(f"Searched paths: {self.font_dir / font_name}")
+                    for sys_path in system_font_paths:
+                        print(f"  - {sys_path}")
+                    print("Using default font (limited character support)")
+                    self._default_font_loaded = True
+                
                 font = ImageFont.load_default()
                 self.font_cache[cache_key] = font
                 return font
 
         # Load the font
-        if font_path.exists():
-            try:
-                font = ImageFont.truetype(str(font_path), size, encoding="unicode")
-            except Exception as e:
-                print(f"Failed to load font {font_path}: {e}")
-                font = ImageFont.load_default()
-
-        self.font_cache[cache_key] = font
-        return font
+        try:
+            font = ImageFont.truetype(str(font_path), size, encoding="unicode")
+            self.font_cache[cache_key] = font
+            return font
+        except Exception as e:
+            print(f"Failed to load font {font_path}: {e}")
+            font = ImageFont.load_default()
+            self.font_cache[cache_key] = font
+            return font
 
     def draw_text(
         self,
@@ -78,7 +87,7 @@ class FontManager:
         text: str,
         position: tuple[int, int],
         font_name: str | None = None,
-        size: int = 16,
+        size: int = DisplayConstants.DEFAULT_FONT_SIZE,
         color: str | tuple[int, int, int] = "#FFFFFF",
     ) -> None:
         """Draw text on image with specified font.
@@ -95,13 +104,13 @@ class FontManager:
         font = self.get_font(font_name, size)
 
         # Convert hex color to RGB if needed
-        if isinstance(color, str) and color.startswith("#"):
-            color = tuple(int(color[i : i + 2], 16) for i in (1, 3, 5))
+        if isinstance(color, str):
+            color = hex_to_rgb(color)
 
         draw.text(position, text, font=font, fill=color)
 
     def get_text_size(
-        self, text: str, font_name: str | None = None, size: int = 16
+        self, text: str, font_name: str | None = None, size: int = DisplayConstants.DEFAULT_FONT_SIZE
     ) -> tuple[int, int]:
         """Get the size of text when rendered.
 
@@ -114,8 +123,17 @@ class FontManager:
             (width, height) of text bounding box.
         """
         font = self.get_font(font_name, size)
-        # Create temporary image for measuring
-        temp_img = Image.new("RGB", (1, 1))
+        # Use cached temporary image for measuring
+        cache_key = size
+        if cache_key not in self._temp_image_cache:
+            self._temp_image_cache[cache_key] = Image.new("RGB", (1, 1))
+        
+        temp_img = self._temp_image_cache[cache_key]
         draw = ImageDraw.Draw(temp_img)
-        bbox = draw.textbbox((0, 0), text, font=font)
-        return bbox[2] - bbox[0], bbox[3] - bbox[1]
+        
+        try:
+            bbox = draw.textbbox((0, 0), text, font=font)
+            return bbox[2] - bbox[0], bbox[3] - bbox[1]
+        except Exception:
+            # Fallback for older PIL versions or edge cases
+            return len(text) * int(size * 0.6), size

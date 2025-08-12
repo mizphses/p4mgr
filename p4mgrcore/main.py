@@ -6,10 +6,13 @@ import time
 from pathlib import Path
 
 from .config import Config
+from .constants import InputConfig, MatrixConfig
 from .display_templates import create_display_template
+from .exceptions import MatrixError
 from .font_manager import FontManager
 from .input_handler import InputHandler
 from .rgbmatrix import RGBMatrix, RGBMatrixOptions
+from .validators import quick_validate_config
 
 
 class P4MgrApp:
@@ -44,27 +47,31 @@ class P4MgrApp:
             Configured RGBMatrix instance.
         """
         options = RGBMatrixOptions()
-
-        # Configuration for 2x P4 32x64 panels
-        options.rows = 32
-        options.cols = 64
-        options.chain_length = 2  # 2 panels chained
-        options.parallel = 1
-        options.hardware_mapping = "adafruit-hat"
-        options.gpio_slowdown = 4
-        options.brightness = 80
+        
+        # Check for custom matrix configuration
+        matrix_config = self.config.config.get("matrix", {})
+        
+        # Apply configuration with defaults
+        options.rows = matrix_config.get("rows", MatrixConfig.DEFAULT_ROWS)
+        options.cols = matrix_config.get("cols", MatrixConfig.DEFAULT_COLS)
+        options.chain_length = matrix_config.get("chain_length", MatrixConfig.DEFAULT_CHAIN_LENGTH)
+        options.parallel = matrix_config.get("parallel", 1)
+        options.hardware_mapping = matrix_config.get("hardware_mapping", MatrixConfig.DEFAULT_HARDWARE_MAPPING)
+        options.gpio_slowdown = matrix_config.get("gpio_slowdown", MatrixConfig.GPIO_SLOWDOWN)
+        options.brightness = matrix_config.get("brightness", MatrixConfig.DEFAULT_BRIGHTNESS)
         options.show_refresh_rate = False
         options.disable_hardware_pulsing = True  # Avoid sound module conflict
-        options.led_rgb_sequence = (
-            "RGB"  # Try different values: "RGB", "RBG", "GRB", "GBR", "BGR", "BRG"
-        )
+        options.led_rgb_sequence = matrix_config.get("led_rgb_sequence", "RGB")
 
         # P4 panel specific settings
-        options.multiplexing = 0  # Try 0-8 if display is garbled
-        options.row_address_type = 0  # Try 0-4 for different addressing
-        options.panel_type = ""  # Try "FM6126A" or "FM6127" for some panels
+        options.multiplexing = matrix_config.get("multiplexing", 0)
+        options.row_address_type = matrix_config.get("row_address_type", 0)
+        options.panel_type = matrix_config.get("panel_type", "")
 
-        return RGBMatrix(options=options)
+        try:
+            return RGBMatrix(options=options)
+        except Exception as e:
+            raise MatrixError(f"RGBMatrixの初期化に失敗しました: {e}") from e
 
     def _setup_signal_handlers(self) -> None:
         """Set up signal handlers for graceful shutdown."""
@@ -93,6 +100,12 @@ class P4MgrApp:
         if not display_config:
             print(f"No configuration found for code: {input_code}")
             return
+        
+        # Validate configuration
+        errors = quick_validate_config({"displays": {input_code: display_config}})
+        if errors:
+            print(f"設定エラー: {', '.join(errors)}")
+            return
 
         # Stop current display if running
         if self.current_display_instance:
@@ -103,19 +116,19 @@ class P4MgrApp:
         self.matrix.Clear()
 
         # Create and render new display
-        display = create_display_template(
-            self.matrix, self.font_manager, display_config
-        )
-        if display:
-            self.current_display = input_code
-            self.current_display_instance = display
-            try:
+        try:
+            display = create_display_template(
+                self.matrix, self.font_manager, display_config
+            )
+            if display:
+                self.current_display = input_code
+                self.current_display_instance = display
                 display.render()
-            except KeyboardInterrupt:
-                # Allow interrupting long-running displays (like scrolling)
-                display.stop()
-        else:
-            print(f"Unknown display type: {display_config.get('type')}")
+            else:
+                print(f"Unknown display type: {display_config.get('type')}")
+        except Exception as e:
+            print(f"表示エラー: {e}")
+            self.clear_display()
 
     def clear_display(self) -> None:
         """Clear the current display."""
@@ -133,6 +146,15 @@ class P4MgrApp:
         """Run the main application loop."""
         print("P4Mgr - LED Matrix Display Manager")
         print("==================================")
+        
+        # Validate initial configuration
+        errors = quick_validate_config(self.config.config)
+        if errors:
+            print("\n設定ファイルにエラーがあります:")
+            for error in errors:
+                print(f"  - {error}")
+            print("\n設定を修正してください。")
+            return
 
         # Create fonts directory if it doesn't exist
         Path(self.font_manager.font_dir).mkdir(exist_ok=True)
@@ -142,13 +164,15 @@ class P4MgrApp:
             print("Failed to start input handler.")
             return
 
-        print("Ready. Enter display codes on USB numpad.")
+        print(f"\nMatrix: {self.matrix.width}x{self.matrix.height}")
+        print(f"Config: {self.config.config_file}")
+        print("\nReady. Enter display codes on USB numpad.")
         print("Press Ctrl+C to exit.")
 
         try:
-            # Keep main thread alive
+            # Keep main thread alive with less frequent checks
             while True:
-                time.sleep(1)
+                time.sleep(InputConfig.DEVICE_RECONNECT_DELAY)
         except KeyboardInterrupt:
             pass
 
