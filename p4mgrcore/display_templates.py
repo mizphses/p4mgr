@@ -201,7 +201,7 @@ class DestinationDisplay(DisplayTemplate):
                 )
 
                 # Update canvas once
-                self.canvas.SetImage(image.convert("RGB"))
+                self.canvas.SetImage(image.convert("RGB", dither=Image.Dither.NONE))
                 self.canvas = self.matrix.SwapOnVSync(self.canvas)
                 return
 
@@ -249,7 +249,7 @@ class DestinationDisplay(DisplayTemplate):
                                 image.putpixel((x, y), pixel)
 
                 # Update canvas
-                self.canvas.SetImage(image.convert("RGB"))
+                self.canvas.SetImage(image.convert("RGB", dither=Image.Dither.NONE))
                 self.canvas = self.matrix.SwapOnVSync(self.canvas)
 
                 # Update position index
@@ -292,7 +292,7 @@ class DestinationDisplay(DisplayTemplate):
                 color=dest_color,
             )
 
-            self.canvas.SetImage(image.convert("RGB"))
+            self.canvas.SetImage(image.convert("RGB", dither=Image.Dither.NONE))
             self.canvas = self.matrix.SwapOnVSync(self.canvas)
 
 
@@ -324,7 +324,7 @@ class TextDisplay(DisplayTemplate):
         )
 
         # Update matrix
-        self.canvas.SetImage(image.convert("RGB"))
+        self.canvas.SetImage(image.convert("RGB", dither=Image.Dither.NONE))
         self.canvas = self.matrix.SwapOnVSync(self.canvas)
 
 
@@ -378,7 +378,7 @@ class ScrollingTextDisplay(DisplayTemplate):
                 current_x += full_width
 
             # Update matrix
-            self.canvas.SetImage(image.convert("RGB"))
+            self.canvas.SetImage(image.convert("RGB", dither=Image.Dither.NONE))
             self.canvas = self.matrix.SwapOnVSync(self.canvas)
 
             # Update position

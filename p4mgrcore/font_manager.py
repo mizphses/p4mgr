@@ -107,6 +107,8 @@ class FontManager:
         if isinstance(color, str):
             color = hex_to_rgb(color)
 
+        # Disable font smoothing for sharper edges
+        draw.fontmode = "1"  # Binary mode (no anti-aliasing)
         draw.text(position, text, font=font, fill=color)
 
     def get_text_size(
