@@ -165,7 +165,7 @@ class P4MgrApp:
             return
 
         print(f"\nMatrix: {self.matrix.width}x{self.matrix.height}")
-        print(f"Config: {self.config.config_file}")
+        print(f"Config: {self.config.config_path}")
         print("\nReady. Enter display codes on USB numpad.")
         print("Press Ctrl+C to exit.")
 
